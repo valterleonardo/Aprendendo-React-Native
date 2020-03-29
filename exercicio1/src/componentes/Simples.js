@@ -1,6 +1,4 @@
 import React from 'react';
 import {Text} from 'react-native';
 
-export default props => {
-  return <Text>Arrow {props.texto}</Text>;
-};
+export default props => <Text>return implict Arrow {props.texto}</Text>;
