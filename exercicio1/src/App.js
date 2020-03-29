@@ -1,12 +1,14 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import Simples from './componentes/Simples';
+import ParImpar from './componentes/ParImpar';
 
 export default class App extends Component {
   render() {
     return (
       <View style={styles.container}>
         <Simples texto="Flexível" />
+        <ParImpar numero={12} />
       </View>
     );
   }
