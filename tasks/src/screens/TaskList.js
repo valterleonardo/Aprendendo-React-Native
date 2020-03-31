@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
   Platform,
+  Alert,
 } from 'react-native';
 
 import commonStyles from '../commonStyles';
@@ -23,7 +24,7 @@ import AddTask from './AddTask';
 export default class TaskList extends Component {
   state = {
     showDoneTasks: true,
-    showAddTask: true,
+    showAddTask: false,
     visibleTasks: [],
     tasks: [
       {
@@ -79,6 +80,23 @@ export default class TaskList extends Component {
     this.setState({tasks}, this.filterTasks());
   };
 
+  addTask = newTask => {
+    if (!newTask.desc.trim()) {
+      Alert.alert('Dados Inválidos', 'Descrição não informada');
+      return;
+    }
+
+    const tasks = [...this.state.tasks];
+    tasks.push({
+      id: Math.random(),
+      desc: newTask.desc,
+      estimateAt: newTask.date,
+      doneAt: null,
+    });
+
+    this.setState({tasks, showAddTask: false}, this.filterTasks);
+  };
+
   render() {
     const today = moment()
       .locale('pt-br')
@@ -88,6 +106,7 @@ export default class TaskList extends Component {
         <AddTask
           isVisible={this.state.showAddTask}
           onCancel={() => this.setState({showAddTask: false})}
+          onSave={this.addTask}
         />
         <ImageBackground source={todayImage} style={styles.background}>
           <View style={styles.iconBar}>
@@ -113,6 +132,12 @@ export default class TaskList extends Component {
             )}
           />
         </View>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => this.setState({showAddTask: true})}
+          activeOpacity={0.7}>
+          <Icon name="plus" size={20} color={commonStyles.colors.secondary} />
+        </TouchableOpacity>
       </View>
     );
   }
@@ -151,5 +176,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: Platform.OS === 'ios' ? 40 : 10,
     justifyContent: 'flex-end',
+  },
+  addButton: {
+    position: 'absolute',
+    right: 30,
+    bottom: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: commonStyles.colors.today,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
