@@ -2,12 +2,17 @@ const express = require('express')
 const app = express()
 
 const bodyParser = require('body-parser')
+
 const saudacao = require('./saudacaoMid')
+const usuarioApi = require('./api/usuario')
 
 app.use(bodyParser.text())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true}))
 app.use(saudacao('Valter'))
+
+app.get('/usuario', usuarioApi.obter)
+app.post('/usuario', usuarioApi.salvar)
 
 app.get('/clientes/relatorio', (req,res) =>{
   res.send(`Cliente relatório: completo = ${req.query.completo} ano = ${req.query.ano}`)
