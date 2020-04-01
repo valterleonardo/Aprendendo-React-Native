@@ -1,8 +1,9 @@
 module.exports = {
   client: 'postgresql',
   connection: {
+    host: '10.1.1.7',
     database: 'tasks',
-    user:     'postgres',
+    user: 'postgres',
     password: 'Postgres2018!'
   },
   pool: {
