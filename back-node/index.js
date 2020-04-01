@@ -14,6 +14,8 @@ app.use(saudacao('Valter'))
 app.get('/usuario', usuarioApi.obter)
 app.post('/usuario', usuarioApi.salvar)
 
+require('./api/produto') (app, 'com params!' )
+
 app.get('/clientes/relatorio', (req,res) =>{
   res.send(`Cliente relatório: completo = ${req.query.completo} ano = ${req.query.ano}`)
 })
