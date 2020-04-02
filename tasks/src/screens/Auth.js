@@ -7,6 +7,7 @@ import {
     TextInput,
     TouchableOpacity,
     Platform,
+    Alert,
 } from 'react-native';
 
 import commonStyles from '../commonStyles';
@@ -17,12 +18,20 @@ const initialState = {
     email: '',
     password: '',
     confirmPassword: '',
-    stageNew: true,
+    stageNew: false,
 };
 
 export default class Auth extends Component {
     state = {
         ...initialState,
+    };
+
+    signinOrSignup = () => {
+        if (this.state.stageNew) {
+            Alert.alert('Sucesso!', 'Conta criada.');
+        } else {
+            Alert.alert('Sucesso!', 'Entrou');
+        }
     };
 
     render() {
@@ -67,7 +76,7 @@ export default class Auth extends Component {
                             secureTextEntry={true}
                         />
                     )}
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={this.signinOrSignup}>
                         <View
                             style={
                                 this.state.stageNew
@@ -80,6 +89,22 @@ export default class Auth extends Component {
                         </View>
                     </TouchableOpacity>
                 </View>
+                <TouchableOpacity
+                    style={styles.alternative}
+                    onPress={() =>
+                        this.setState({
+                            stageNew: !this.state.stageNew,
+                            name: '',
+                            password: '',
+                            confirmPassword: '',
+                        })
+                    }>
+                    <Text style={styles.subtitle}>
+                        {this.state.stageNew
+                            ? 'Já possui conta?'
+                            : 'Ainda não possui conta?'}
+                    </Text>
+                </TouchableOpacity>
             </ImageBackground>
         );
     }
@@ -96,7 +121,7 @@ const styles = StyleSheet.create({
         fontFamily: commonStyles.fontfFamily,
         color: commonStyles.colors.secondary,
         fontSize: 70,
-        marginBottom: 30,
+        marginBottom: 20,
     },
     subtitle: {
         fontFamily: commonStyles.fontfFamily,
@@ -134,5 +159,8 @@ const styles = StyleSheet.create({
         color: commonStyles.colors.secondary,
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    alternative: {
+        padding: 10,
     },
 });
