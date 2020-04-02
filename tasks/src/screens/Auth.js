@@ -4,14 +4,15 @@ import {
     Text,
     StyleSheet,
     View,
-    TextInput,
     TouchableOpacity,
-    Platform,
-    Alert,
 } from 'react-native';
+import axios from 'axios';
 
 import commonStyles from '../commonStyles';
 import backgroudImage from '../../assets/imgs/login.jpg';
+import AuthInput from '../components/AuthInput';
+
+import {server, showError, showSuccess} from '../common';
 
 const initialState = {
     name: '',
@@ -28,13 +29,62 @@ export default class Auth extends Component {
 
     signinOrSignup = () => {
         if (this.state.stageNew) {
-            Alert.alert('Sucesso!', 'Conta criada.');
+            this.signup();
         } else {
-            Alert.alert('Sucesso!', 'Entrou');
+            this.signin();
+        }
+    };
+
+    signup = async () => {
+        try {
+            await axios.post(`${server}/signup`, {
+                name: this.state.name,
+                email: this.state.email,
+                password: this.state.password,
+                confirmPassword: this.state.confirmPassword,
+            });
+
+            showSuccess('Usuário cadastro com sucesso!');
+            this.setState({...initialState});
+        } catch (e) {
+            showError(e);
+        }
+    };
+
+    signin = async () => {
+        try {
+            const res = await axios.post(`${server}/signin`, {
+                email: this.state.email,
+                password: this.state.password,
+            });
+
+            // eslint-disable-next-line dot-notation
+            axios.defaults.headers.common['Authorization'] = `bearer ${
+                res.data.token
+            }`;
+            this.props.navigation.navigate('Home');
+        } catch (e) {
+            showError(e);
         }
     };
 
     render() {
+        const validations = [];
+        validations.push(this.state.email && this.state.email.includes('@'));
+        validations.push(
+            this.state.password && this.state.password.trim().length >= 6,
+        );
+        if (this.state.stageNew) {
+            validations.push(
+                this.state.password === this.state.confirmPassword,
+            );
+            validations.push(
+                this.state.name && this.state.name.trim().length >= 2,
+            );
+        }
+
+        const validForm = validations.reduce((t, a) => t && a);
+
         return (
             <ImageBackground source={backgroudImage} style={styles.backgroud}>
                 <Text style={styles.title}>Tasks</Text>
@@ -45,20 +95,23 @@ export default class Auth extends Component {
                             : 'Informe seus dados'}
                     </Text>
                     {this.state.stageNew && (
-                        <TextInput
+                        <AuthInput
+                            icon="user"
                             placeholder="Seu nome"
                             value={this.state.name}
                             style={styles.input}
                             onChangeText={name => this.setState({name})}
                         />
                     )}
-                    <TextInput
+                    <AuthInput
+                        icon="at"
                         placeholder="Seu e-mail"
                         value={this.state.email}
                         style={styles.input}
                         onChangeText={email => this.setState({email})}
                     />
-                    <TextInput
+                    <AuthInput
+                        icon="lock"
                         placeholder="Sua senha"
                         value={this.state.password}
                         style={styles.input}
@@ -66,7 +119,8 @@ export default class Auth extends Component {
                         secureTextEntry={true}
                     />
                     {this.state.stageNew && (
-                        <TextInput
+                        <AuthInput
+                            icon="asterisk"
                             placeholder="Confirme sua senha"
                             value={this.state.confirmPassword}
                             style={styles.input}
@@ -76,13 +130,16 @@ export default class Auth extends Component {
                             secureTextEntry={true}
                         />
                     )}
-                    <TouchableOpacity onPress={this.signinOrSignup}>
+                    <TouchableOpacity
+                        onPress={this.signinOrSignup}
+                        disabled={!validForm}>
                         <View
-                            style={
+                            style={[
                                 this.state.stageNew
-                                    ? styles.buttonNew
-                                    : styles.button
-                            }>
+                                    ? [styles.buttonNew]
+                                    : styles.button,
+                                !validForm ? styles.buttonDisabled : {},
+                            ]}>
                             <Text style={styles.buttonText}>
                                 {this.state.stageNew ? 'Cadastrar' : 'Entrar'}
                             </Text>
@@ -131,9 +188,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     input: {
-        margin: 5,
+        marginTop: 5,
         backgroundColor: '#FFF',
-        padding: Platform.OS === 'ios' ? 20 : 10,
     },
     formContainer: {
         backgroundColor: 'rgba(0,0,0,0.8)',
@@ -142,17 +198,20 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: '#080',
-        margin: 5,
-        marginTop: 15,
+        marginTop: 10,
         padding: 10,
         alignItems: 'center',
+        borderRadius: 3,
     },
     buttonNew: {
         backgroundColor: '#03A',
-        margin: 5,
-        marginTop: 15,
+        marginTop: 10,
         padding: 10,
         alignItems: 'center',
+        borderRadius: 3,
+    },
+    buttonDisabled: {
+        backgroundColor: '#777',
     },
     buttonText: {
         fontFamily: commonStyles.fontfFamily,
